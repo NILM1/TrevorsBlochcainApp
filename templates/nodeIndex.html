@@ -1,0 +1,246 @@
+<style>
+  .myTable {
+    border:50px solid #c3e6cb;
+    border-collapse: separate; 
+    border-radius: 27px;
+    -webkit-box-shadow: -5px 13px 18px 5px rgba(0,0,0,0.7); 
+    box-shadow: -5px 13px 18px 5px rgba(0,0,0,0.7);
+    }
+    
+  .pendingTable {
+    -webkit-box-shadow: -5px 13px 18px 5px rgba(0,0,0,0.7); 
+    box-shadow: -5px 13px 18px 5px rgba(0,0,0,0.7);
+    }
+
+
+  body{
+    background: rgb(235,240,246);
+    background: radial-gradient(circle, rgba(235,240,246,1) 2%, rgba(218,222,226,1) 22%, rgba(203,217,230,1) 100%);
+      }
+
+  td{
+    background-color: white;
+  }
+  .topPadding{
+    padding-top: 25px;
+  }
+
+.modal-header{
+  background-color: #ffc107;
+}
+
+.buttonPadding{
+  margin-right:10px
+}
+
+nav{
+  box-shadow: 0px 1px 15px 6px #000000;
+}
+
+.myTitle{
+  font-family: "Arial";
+  letter-spacing: 4.2px;
+  word-spacing: 3.6px;
+  color: #EAEAEA;
+  text-shadow: -2px 5px 9px rgba(255,193,7,0.84);
+}
+
+.no-js #loader { display: none;  }
+.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+.se-pre-con {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: url(http://smallenvelop.com/wp-content/uploads/2014/08/Preloader_11.gif) center no-repeat #fff;
+}
+
+
+</style>
+
+
+
+
+
+<html>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  
+
+
+   <body>
+    <div class="se-pre-con"></div>
+    <nav class="navbar lg navbar-dark bg-dark"> 
+        <form class="form-inline my-2 my-lg-0">
+          <button type="button" class="btn btn-warning buttonPadding" data-toggle="modal" data-target="#myModal">Send Money</button>
+          <a href="/"><button type="button" class = "btn btn-outline-warning buttonPadding ">Resync</button></a>
+        </form>
+        <form class="form-inline my-2 my-lg-0">
+          <h2 class='myTitle'>MY BLOCK<b>CHAIN</b></h2>
+        </form>
+    </nav>
+
+ 
+  
+    <div class="container">
+    <h1 class='topPadding text-center'> <b>Node{{ port }}'s Balance:</b> ${{ balance }} </h1>
+    <h3 class='topPadding text-center'>Unconfirmed Transactions</h3>
+    {% if transactions %}
+      <table class="table table-sm pendingTable">
+        <thead>
+          <tr class="table-primary">
+            <th scope="col">#</th>
+            <th scope="col">To</th>
+            <th scope="col">From</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in transactions %}
+            <tr>
+              <td> {{ loop.index }} </td>
+              <td>{{ transaction['To'] }}</td>
+              <td>{{ transaction['From']  }}</td>
+              <td>${{ transaction['Amount'] }}</td>
+              <td>{{ transaction['Timestamp'] | convert_time }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <!--Set up mining laoding-->
+
+     <!--Set up mining button-->
+      <form action= '{{ url }}/mine' method="post" id="mineForm">
+        <input type="submit" value="Mine!"  class="btn btn-primary">
+      </form>
+    {% else %}
+    <p class= 'text-center' style="color:rgb(226, 17, 9)">No unconfirmed transactions!</p>
+    {% endif %}
+
+    <!--Set up viewing blochain history-->
+    <br><br>
+    <h3 class='text-center'>Our Blockchain</h3>
+    {% if ourChain %}
+      {% for block in ourChain.chain %}
+        <table class="table  table-sm myTable">
+            <tr>
+              <th scope="col" class="table-success">Block Number</th>
+            </tr>
+            <tr>
+              <td>{{ block.index }}</td>
+            </tr>
+            <tr>
+              <th scope="col" class="table-success">Nonce</th>
+            </tr>
+            <tr>
+              <td>{{ block.nonce }}</td>
+            </tr>
+            <tr>
+              <th scope="col" class="table-success">Transaction Info</th>
+            </tr>
+            <tr>
+              {% if block.transactions %}
+              <td>
+                {% for transactionItem in block.transactions %}
+                  {% for key, value in transactionItem.items() %}
+                    {% if key == 'Timestamp' %}
+                    <text>{{ key }}: </text> <text>{{ value | convert_time }} </text><br>
+                    {% else %}
+                    <text>{{ key }}: </text> <text>{{ value }} </text><br>
+                    {% endif %}
+                  {% endfor %}
+                <br><br>
+                {% endfor %}
+              </td>
+              {% else %}
+              <td>No Transactions</td>
+              {% endif %}
+            </tr>
+            <tr>
+              <th scope="col" class="table-success">Timestamp</th>
+            </tr>
+            <tr>
+              <td>{{ block.timestamp | convert_time }}</td>
+            </tr>
+            <tr>
+              <th scope="col" class="table-success">Previous Hash</th>
+            </tr>
+            <tr>
+              <td>{{ block.previous_hash }}</td>
+            </tr>
+            <tr>
+              <th scope="col" class="table-success"> Hash</th>
+            </tr>
+            <tr>
+              <td>{{ block.hash }}</td>
+            </tr>
+        </table>
+        <br>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  
+    <!-- The Modal -->
+    <div class="modal" id="myModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Make A Transaction</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          
+          <!-- Modal body -->
+          <div class="modal-body ">
+            <form action="/submit" id="textform" method="post" class = "form-horizontal">
+              <div class="form-group">
+                <label for="email">To Name</label>
+                <input type="text" name="to" placeholder="To..." class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="email">Amount Sending:</label>
+                <input type="number" name="amount" placeholder="Amount.." class="form-control">
+              </div>
+                  <!-- Modal footer -->
+              <div class="modal-footer">
+                <button type="submit" class = "btn btn-success"> Submit </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+              </div>
+            </form>
+          </div>
+          
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  </body>
+</html>
+
+<script>
+  $(window).on('load',function() {
+  // Animate loader off screen
+  $(".se-pre-con").fadeOut("medium");;
+});
+
+
+$(document).ready(function(){
+  $("#mineForm").on("submit", function(){
+    //$("#pageloader").fadeIn();
+    $(this).prop("disabled", true);
+      // add spinner to button
+    $(this).html(
+        `<button class="btn btn-primary" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mining...
+        </button>`
+      );
+  });//submit
+});
+</script>
